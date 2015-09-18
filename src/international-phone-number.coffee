@@ -53,7 +53,7 @@ angular.module("internationalPhoneNumber", [])
 
     hasNotEnteredNumber = (value) ->
       selectedCountry = element.intlTelInput('getSelectedCountryData')
-      !value || (selectedCountry && selectedCountry.dialCode == value)
+      !value || (selectedCountry && "+#{selectedCountry.dialCode} " == value)
 
     options = angular.copy(ipnConfig)
 

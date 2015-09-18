@@ -50,7 +50,7 @@
           hasNotEnteredNumber = function(value) {
             var selectedCountry;
             selectedCountry = element.intlTelInput('getSelectedCountryData');
-            return !value || (selectedCountry && selectedCountry.dialCode === value);
+            return !value || (selectedCountry && ("+" + selectedCountry.dialCode + " ") === value);
           };
           options = angular.copy(ipnConfig);
           angular.forEach(options, function(value, key) {
