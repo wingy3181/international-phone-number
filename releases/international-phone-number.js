@@ -22,7 +22,7 @@
           ngModel: '='
         },
         link: function(scope, element, attrs, ctrl) {
-          var handleWhatsSupposedToBeAnArray, options, read, watchOnce;
+          var handleWhatsSupposedToBeAnArray, hasNotEnteredNumber, isValidNumber, options, read, watchOnce;
           if (ctrl) {
             if (element.val() !== '') {
               $timeout(function() {
@@ -40,6 +40,17 @@
             } else {
               return value.toString().replace(/[ ]/g, '').split(',');
             }
+          };
+          isValidNumber = function(value) {
+            if (hasNotEnteredNumber(value)) {
+              return true;
+            }
+            return element.intlTelInput("isValidNumber");
+          };
+          hasNotEnteredNumber = function(value) {
+            var selectedCountry;
+            selectedCountry = element.intlTelInput('getSelectedCountryData');
+            return !value || (selectedCountry && selectedCountry.dialCode === value);
           };
           options = angular.copy(ipnConfig);
           angular.forEach(options, function(value, key) {
@@ -84,16 +95,23 @@
             if (!value) {
               return value;
             }
-            return value.replace(/[^\d]/g, '');
-          });
-          ctrl.$validators.internationalPhoneNumber = function(value) {
-            var selectedCountry;
-            selectedCountry = element.intlTelInput('getSelectedCountryData');
-            if (!value || (selectedCountry && selectedCountry.dialCode === value)) {
-              return true;
+            if (ctrl.$validators) {
+              return value.replace(/[^\d]/g, '');
+            } else if (isValidNumber(value)) {
+              ctrl.$setValidity('internationalPhoneNumber', true);
+              if (hasNotEnteredNumber(value)) {
+                return '';
+              } else {
+                return value.replace(/[^\d]/g, '');
+              }
+            } else {
+              ctrl.$setValidity('internationalPhoneNumber', false);
+              return void 0;
             }
-            return element.intlTelInput("isValidNumber");
-          };
+          });
+          if (ctrl.$validators) {
+            ctrl.$validators.internationalPhoneNumber = isValidNumber;
+          }
           element.on('blur keyup change', function(event) {
             return scope.$apply(read);
           });

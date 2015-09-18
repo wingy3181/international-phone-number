@@ -45,6 +45,16 @@ angular.module("internationalPhoneNumber", [])
       else
         value.toString().replace(/[ ]/g, '').split(',')
 
+    isValidNumber = (value) ->      
+      if hasNotEnteredNumber value
+        return true
+
+      element.intlTelInput("isValidNumber")
+
+    hasNotEnteredNumber = (value) ->
+      selectedCountry = element.intlTelInput('getSelectedCountryData')
+      !value || (selectedCountry && selectedCountry.dialCode == value)
+
     options = angular.copy(ipnConfig)
 
     angular.forEach options, (value, key) ->
@@ -91,16 +101,22 @@ angular.module("internationalPhoneNumber", [])
     ctrl.$parsers.push (value) ->
       if !value
         return value
+      
+      if ctrl.$validators
+        value.replace(/[^\d]/g, '')
+      else if isValidNumber value
+        ctrl.$setValidity('internationalPhoneNumber', true)
+        if hasNotEnteredNumber value
+          ''
+        else
+          value.replace(/[^\d]/g, '')
 
-      value.replace(/[^\d]/g, '')
+      else
+        ctrl.$setValidity('internationalPhoneNumber', false)
+        return undefined;
 
-    ctrl.$validators.internationalPhoneNumber = (value) ->
-      selectedCountry = element.intlTelInput('getSelectedCountryData')
-
-      if !value || (selectedCountry && selectedCountry.dialCode == value)
-        return true
-
-      element.intlTelInput("isValidNumber")
+    if ctrl.$validators
+      ctrl.$validators.internationalPhoneNumber = isValidNumber
 
     element.on 'blur keyup change', (event) ->
       scope.$apply read
