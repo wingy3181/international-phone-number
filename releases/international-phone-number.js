@@ -27,12 +27,20 @@
             if (element.val() !== '') {
               $timeout(function() {
                 element.intlTelInput('setNumber', element.val());
-                return ctrl.$setViewValue(element.val());
+                if (hasNotEnteredNumber(element.val())) {
+                  return ctrl.$setViewValue('');
+                } else {
+                  return ctrl.$setViewValue(element.val());
+                }
               }, 0);
             }
           }
           read = function() {
-            return ctrl.$setViewValue(element.val());
+            if (hasNotEnteredNumber(element.val())) {
+              return ctrl.$setViewValue('');
+            } else {
+              return ctrl.$setViewValue(element.val());
+            }
           };
           handleWhatsSupposedToBeAnArray = function(value) {
             if (value instanceof Array) {
@@ -93,6 +101,7 @@
           });
           ctrl.$parsers.push(function(value) {
             if (!value) {
+              ctrl.$setValidity('internationalPhoneNumber', true);
               return value;
             }
             if (ctrl.$validators) {
